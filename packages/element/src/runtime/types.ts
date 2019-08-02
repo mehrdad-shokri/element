@@ -147,7 +147,7 @@ export interface Browser {
 	 * You can use either a numeric value in seconds to wait for a specific time,
 	 * or a <[Condition]>, for more flexible conditions.
 	 */
-	wait(timeoutOrCondition: Condition | number): Promise<boolean>
+	wait<T>(timeoutOrCondition: Condition<T> | number): Promise<T | null>
 
 	waitForNavigation(): Promise<any>
 
