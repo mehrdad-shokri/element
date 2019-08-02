@@ -38,8 +38,11 @@ describe('Condition', function() {
 			// Triggers a timeout of 500ms
 			await page.click('a#enable_btn')
 
-			let found = await condition.waitFor(page.mainFrame())
-			expect(found).to.equal(true)
+			let handle = await condition.waitFor(page.mainFrame())
+			expect(handle).to.not.be.null
+			if (handle) {
+				expect(await handle.getId()).to.equal('enable_btn')
+			}
 		}).timeout(31e3)
 
 		it('waits Until.elementIsDisabled', async () => {
@@ -62,8 +65,12 @@ describe('Condition', function() {
 
 			await page.click('#btn')
 
-			let found = await condition.waitFor(page.mainFrame())
-			expect(found).to.equal(true)
+			let handle = await condition.waitFor(page.mainFrame())
+			expect(handle).to.not.be.null
+
+			if (handle) {
+				expect(await handle.getId()).to.equal('btn')
+			}
 		}).timeout(31e3)
 	})
 })

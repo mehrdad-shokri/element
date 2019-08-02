@@ -6,15 +6,15 @@ import { clearTimeout } from 'timers'
  * TODO: Generalize waitFor such that we can avoid needing waitForEvent custom
  * handler.
  */
-export class DialogCondition extends Condition {
+export class DialogCondition extends Condition<Dialog | null> {
 	toString() {
 		return 'waiting for dialog to appear'
 	}
 
 	hasWaitFor = false
 
-	public async waitFor(frame: Frame): Promise<boolean> {
-		return true
+	public async waitFor(frame: Frame): Promise<null> {
+		return null
 	}
 
 	public async waitForEvent(page: Page): Promise<Dialog> {

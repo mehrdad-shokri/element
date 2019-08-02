@@ -1,7 +1,7 @@
 import { Condition } from '../Condition'
 import { Frame } from 'puppeteer'
 
-export class TitleCondition extends Condition {
+export class TitleCondition extends Condition<string> {
 	constructor(desc: string, public expectedTitle: string, public partial: boolean = false) {
 		super(desc)
 	}
@@ -10,7 +10,7 @@ export class TitleCondition extends Condition {
 		return `page title to equal '${this.expectedTitle}'`
 	}
 
-	public async waitFor(frame: Frame): Promise<boolean> {
+	public async waitFor(frame: Frame): Promise<string> {
 		await frame.waitForFunction(
 			(title: string, partial: boolean) => {
 				if (typeof title === 'string') {
@@ -29,6 +29,7 @@ export class TitleCondition extends Condition {
 			this.expectedTitle,
 			this.partial === true,
 		)
-		return true
+
+		return frame.evaluate(() => document.title.trim())
 	}
 }

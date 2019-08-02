@@ -1,4 +1,5 @@
-import { ElementCondition, NullableLocatable } from '../Condition'
+import { NullableLocatable } from '../Condition'
+import { ElementCondition } from './ElementCondition'
 import { EvaluateFn } from 'puppeteer'
 
 export class ElementVisibilityCondition extends ElementCondition {
@@ -25,7 +26,7 @@ export class ElementVisibilityCondition extends ElementCondition {
 	}
 }
 
-export class ElementLocatedCondition extends ElementCondition {
+export class ElementLocatedCondition<T> extends ElementCondition {
 	constructor(desc: string, locator: NullableLocatable, ...args: any[]) {
 		super(desc, locator)
 		this.pageFuncArgs = args
@@ -40,7 +41,7 @@ export class ElementLocatedCondition extends ElementCondition {
 	}
 }
 
-export class ElementsLocatedCondition extends ElementCondition {
+export class ElementsLocatedCondition<T> extends ElementCondition {
 	constructor(public desc: string, locator: NullableLocatable, ...args: any[]) {
 		super(desc, locator)
 

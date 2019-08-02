@@ -1,4 +1,5 @@
-import { ElementCondition, NullableLocatable } from '../Condition'
+import { NullableLocatable } from '../Condition'
+import { ElementCondition } from './ElementCondition'
 import { EvaluateFn } from 'puppeteer'
 
 export class ElementTextCondition extends ElementCondition {

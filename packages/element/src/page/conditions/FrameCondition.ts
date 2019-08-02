@@ -2,7 +2,7 @@ import { Condition, NullableLocatable } from '../Condition'
 import { Frame, Page } from 'puppeteer'
 import { getFrames } from '../../runtime/Browser'
 
-export class FrameCondition extends Condition {
+export class FrameCondition extends Condition<Frame | null> {
 	constructor(desc: string, public id: NullableLocatable) {
 		super(desc)
 	}
@@ -11,49 +11,7 @@ export class FrameCondition extends Condition {
 		return `frame [name='${this.id}']`
 	}
 
-	// public async waitFor(frame: Frame, page: Page): Promise<Frame | Error> {
-	// 	let { timeout } = this
-
-	// 	console.log(page.target().type())
-
-	// 	page.on('framenavigated', frame => {
-	// 		console.log(`Frame: '${frame.name()}'`)
-	// 	})
-
-	// 	return frame.waitForFunction(
-	// 		(id: string) => {
-	// 			function getFrames(frame) {
-	// 				const frames = []
-
-	// 				Array.from(frame.frames).forEach(f => {
-	// 					frames.push(f)
-	// 					frames.push(...getFrames(f))
-	// 				})
-
-	// 				return frames
-	// 			}
-
-	// 			let frames = getFrames(window)
-	// 			return frames.find(frame => frame.name === id || frame.id === id)
-
-	// 			// if (typeof title === 'string') {
-	// 			// 	if (title.startsWith('/') && title.endsWith('/')) {
-	// 			// 		// RegExp
-	// 			// 		let exp = new RegExp(title.slice(1, title.length - 1))
-	// 			// 		return exp.test(document.title)
-	// 			// 	} else if (partial) {
-	// 			// 		return document.title.indexOf(title) > -1
-	// 			// 	} else {
-	// 			// 		return document.title.trim() === title.trim()
-	// 			// 	}
-	// 			// }
-	// 		},
-	// 		{ polling: 'raf', timeout },
-	// 		this.id,
-	// 	)
-	// }
-
-	public async waitFor(frame: Frame, page: Page): Promise<Frame | Error> {
+	public async waitFor(frame: Frame, page: Page): Promise<Frame | null> {
 		let waiterPromise = new Promise<Frame>(yeah => {
 			const cleanup = () => {
 				page.removeListener('framenavigated', handler)
@@ -82,21 +40,20 @@ export class FrameCondition extends Condition {
 			}
 		})
 
-		return Promise.race<Frame | Error>([waiterPromise, this.createTimeoutPromise()]).then(
-			result => {
-				clearTimeout(this.maximumTimer)
-				return result
-			},
-		)
+		return Promise.race<Frame | null>([waiterPromise, this.createTimeoutPromise()]).then(result => {
+			clearTimeout(this.maximumTimer)
+			return result
+		})
 	}
 
 	private maximumTimer: NodeJS.Timer
 
 	private createTimeoutPromise() {
-		// if (!this.timeout) return new Promise(() => {})
 		const errorMessage = `Frame Wait Timeout Exceeded: ${this.timeout}ms exceeded`
 		return new Promise<Error>(yeah => (this.maximumTimer = setTimeout(yeah, this.timeout))).then(
-			() => new Error(errorMessage),
+			() => {
+				throw new Error(errorMessage)
+			},
 		)
 	}
 }

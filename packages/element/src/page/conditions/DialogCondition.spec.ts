@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import 'mocha'
 import { DogfoodServer } from '../../../tests/support/fixture-server'
 import { launchPuppeteer, testPuppeteer } from '../../../tests/support/launch-browser'
-import { Page, Dialog } from 'puppeteer'
+import { Page } from 'puppeteer'
 import { Until } from '../Until'
 
 let dogfoodServer = new DogfoodServer()
@@ -32,9 +32,13 @@ describe('Condition', function() {
 
 			page.click('#alert')
 
-			let alert: Dialog = await condition.waitForEvent(page)
-			expect(alert.message()).to.equal('ok')
-			await alert.dismiss()
+			let alert = await condition.waitForEvent(page)
+
+			expect(alert).to.not.be.null
+			if (alert) {
+				expect(alert.message()).to.equal('ok')
+				await alert.dismiss()
+			}
 		})
 
 		it('waits Until.alertIsPresent confirm', async () => {
@@ -42,9 +46,13 @@ describe('Condition', function() {
 
 			page.click('#confirm')
 
-			let alert: Dialog = await condition.waitForEvent(page)
-			expect(alert.message()).to.equal('set the value')
-			await alert.accept()
+			let alert = await condition.waitForEvent(page)
+
+			expect(alert).to.not.be.null
+			if (alert) {
+				expect(alert.message()).to.equal('set the value')
+				await alert.accept()
+			}
 		})
 
 		it('waits Until.alertIsPresent prompt', async () => {
@@ -52,9 +60,13 @@ describe('Condition', function() {
 
 			page.click('#prompt')
 
-			let alert: Dialog = await condition.waitForEvent(page)
-			expect(alert.message()).to.equal('enter your name')
-			await alert.accept('Ivan')
+			let alert = await condition.waitForEvent(page)
+
+			expect(alert).to.not.be.null
+			if (alert) {
+				expect(alert.message()).to.equal('enter your name')
+				await alert.accept('Ivan')
+			}
 		})
 	})
 })

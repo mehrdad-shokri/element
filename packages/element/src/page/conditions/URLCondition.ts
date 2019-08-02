@@ -1,7 +1,7 @@
 import { Condition } from '../Condition'
 import { Frame } from 'puppeteer'
 
-export class URLCondition extends Condition {
+export class URLCondition extends Condition<string> {
 	constructor(desc: string, public url: string, public partial: boolean = false) {
 		super(desc)
 	}
@@ -10,7 +10,7 @@ export class URLCondition extends Condition {
 		return `waiting for URL to equal "${this.url}"`
 	}
 
-	public async waitFor(frame: Frame): Promise<boolean> {
+	public async waitFor(frame: Frame): Promise<string> {
 		await frame.waitForFunction(
 			(url: string, partial: boolean) => {
 				if (typeof url === 'string') {
@@ -25,10 +25,10 @@ export class URLCondition extends Condition {
 					}
 				}
 			},
-			{ polling: 'raf', timeout: 30e3 },
+			{ polling: 'raf', timeout: this.settings.waitTimeout || 30e3 },
 			this.url,
 			this.partial === true,
 		)
-		return true
+		return frame.url()
 	}
 }
