@@ -1,6 +1,6 @@
-import { Argv, Arguments } from 'yargs'
-import * as yeomanEnv from 'yeoman-environment'
 import { resolve } from 'path'
+import { Arguments, Argv } from 'yargs'
+import * as yeomanEnv from 'yeoman-environment'
 
 export const handler = (args: Arguments) => {
 	const env = yeomanEnv.createEnv()

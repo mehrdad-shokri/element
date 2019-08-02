@@ -2,10 +2,11 @@ import { step, TestSettings, Until, By, Device } from '@flood/element'
 import * as assert from 'assert'
 
 export const settings: TestSettings = {
-	device: Device.iPadLandscape,
-	userAgent: 'flood-chrome-test',
 	clearCache: true,
 	disableCache: true,
+	// actionDelay: 2,
+	// stepDelay: 3
+	loopCount: Infinity,
 }
 
 /**

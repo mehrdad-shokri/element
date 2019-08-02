@@ -1,13 +1,13 @@
 import * as findRoot from 'find-root'
 import { existsSync, readFileSync } from 'fs'
-import { resolve } from 'path'
+import { join } from 'path'
 
 export default function ownPackage(): any {
 	const root = findRoot(__dirname)
-	const pkgFile = resolve(root, 'package.json')
+	const pkgFile = join(root, 'package.json')
 
 	if (!existsSync(pkgFile)) {
-		throw new Error('no package.json found')
+		throw new Error(`no package.json found in "${root}"`)
 	}
 
 	return JSON.parse(readFileSync(pkgFile, 'utf8'))

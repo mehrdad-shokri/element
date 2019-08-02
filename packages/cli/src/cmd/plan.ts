@@ -1,8 +1,9 @@
-import { Argv, Arguments } from 'yargs'
-import { inspect } from 'util'
 import { EvaluatedScript, nullRuntimeEnvironment } from '@flood/element/api'
-import chalk from 'chalk'
 import * as boxen from 'boxen'
+import chalk from 'chalk'
+import { inspect } from 'util'
+import { Arguments, Argv } from 'yargs'
+
 import { checkFile } from './common'
 
 function rpad(n: number, maxN: number, padChar = ' '): string {
@@ -16,7 +17,6 @@ const main = async (args: Arguments) => {
 	const script = await EvaluatedScript.mustCompileFile(args.file, nullRuntimeEnvironment)
 
 	if (args.json) return printJSON(script)
-
 	const { settings, steps } = script
 
 	console.log(
@@ -46,10 +46,7 @@ const main = async (args: Arguments) => {
 }
 
 function printJSON(script: EvaluatedScript) {
-	const o = {
-		settings: script.settings,
-		steps: script.steps.map(s => s.name),
-	}
+	const o = { settings: script.settings, steps: script.steps.map(s => s.name) }
 	console.log(JSON.stringify(o, null, '  '))
 }
 
@@ -68,4 +65,5 @@ export const builder = (yargs: Argv) => {
 			return true
 		})
 }
+
 export const handler = main

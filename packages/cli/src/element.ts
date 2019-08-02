@@ -1,6 +1,5 @@
 import * as argv from 'yargs'
 import chalk from 'chalk'
-import { join } from 'path'
 import { error } from './utils/out/error'
 import ownPackage from './utils/ownPackage'
 import * as semver from 'semver'
@@ -10,8 +9,6 @@ const debug = require('debug')('element:main')
 
 import * as checkForUpdate from 'update-check'
 import * as ms from 'ms'
-
-const cmdRoot = join(__dirname, 'cmd')
 
 export const handleUnexpected = (err: Error) => {
 	debug('handling unexpected error')
@@ -51,25 +48,28 @@ export async function main() {
 
 	await doUpdateCheck(pkg)
 
-	return argv
-		.usage(chalk`{bold {blueBright element}} <command> [options]`)
-		.commandDir(cmdRoot, {
-			extensions: ['js', 'ts'],
-		})
-		.updateStrings({
-			'Commands:': chalk.grey('Commands:\n'),
-			'Options:': chalk.grey('Options:\n'),
-		})
-		.version(pkg.version)
-		.demandCommand()
-		.help('help')
-		.showHelpOnFail(true)
-		.recommendCommands()
-		.example(
-			'$0 run ./examples/flood-challenge.ts',
-			'Run the Flood Challenge example script in your local browser',
-		)
-		.epilogue(`For more information on Flood Element, see https://element.flood.io`).argv
+	return (
+		argv
+			.usage(chalk`{bold {blueBright element}} <command> [options]`)
+			.command(require('./cmd/init'))
+			.command(require('./cmd/plan'))
+			.command(require('./cmd/run'))
+			.command(require('./cmd/generate'))
+			.updateStrings({
+				'Commands:': chalk.grey('Commands:\n'),
+				'Options:': chalk.grey('Options:\n'),
+			})
+			.version(pkg.version)
+			.demandCommand()
+			.help('help')
+			.showHelpOnFail(true)
+			.recommendCommands()
+			.example(
+				'$0 run ./examples/flood-challenge.ts',
+				'Run the Flood Challenge example script in your local browser',
+			)
+			.epilogue(`For more information on Flood Element, see https://element.flood.io`).argv
+	)
 }
 
 const info = (...msgs: string[]) => `${chalk.gray('>')} ${msgs.join('\n')}`

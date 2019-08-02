@@ -9,7 +9,10 @@
 	},
 	"private": false,
 	"scripts": {
-		"build": "tsc",
+		"build-tsc": "tsc",
+		"build": "ncc build -e @flood/element/api -e @flood/element -o dist ./index.ts",
+		"prebuild": "rm -rf dist",
+		"postbuild": "cp ./package.json dist/",
 		"build:watch": "tsc --watch",
 		"element": "ts-node -- ./index.ts",
 		"element:inspectb": "node --inspect-brk -r ts-node/register ./index.ts",
@@ -38,7 +41,8 @@
 		"@types/chokidar": "^1.7.5",
 		"@types/ora": "^1.3.4",
 		"@types/yargs": "^11.0.0",
-		"@types/yeoman-generator": "^2.0.3"
+		"@types/yeoman-generator": "^2.0.3",
+		"@zeit/ncc": "^0.20.4"
 	},
 	"prettier": {
 		"semi": false,
@@ -46,9 +50,6 @@
 		"trailingComma": "all",
 		"printWidth": 100,
 		"useTabs": true,
-		"tabWidth": 2,
-		"bracketSpacing": true,
-		"jsxBracketSameLine": true,
-		"arrowParens": "avoid"
+		"tabWidth": 2
 	}
 }
