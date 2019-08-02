@@ -9,9 +9,15 @@ import { ElementSelectedCondition } from './conditions/ElementSelectedCondition'
 import { ElementTextCondition } from './conditions/ElementTextCondition'
 import { URLCondition } from './conditions/URLCondition'
 import { DialogCondition } from './conditions/DialogCondition'
+import { PopupCondition } from './conditions/PopupCondition'
 import { FrameCondition } from './conditions/FrameCondition'
 import { Condition } from './Condition'
 import { NullableLocatable, Locatable } from '../runtime/types'
+import { Browser } from '../runtime/Browser'
+import { Dialog, Frame } from 'puppeteer'
+import { ElementHandle } from './ElementHandle'
+
+type MaybeElementHandle = ElementHandle | null
 
 /**
  * Until contains a wealth of useful <Condition>s.
@@ -34,7 +40,7 @@ export class Until {
 	 *
 	 * Upon successful resolution of this condition, the driver will be left focused on the new frame.
 	 */
-	static ableToSwitchToFrame(frame: Locatable): Condition {
+	static ableToSwitchToFrame(frame: Locatable): Condition<Frame | null> {
 		return new FrameCondition('ableToSwitchToFrame', frame)
 	}
 
@@ -42,15 +48,19 @@ export class Until {
 	 * Creates a condition that waits for an alert to be opened. Upon success,
 	 * the returned promise will be fulfilled with the handle for the opened alert.
 	 */
-	static alertIsPresent(): Condition {
+	static alertIsPresent(): Condition<Dialog | null> {
 		return new DialogCondition('alertIsPresent')
+	}
+
+	static popupIsPresent(): Condition<Browser | null> {
+		return new PopupCondition('popupIsPresent')
 	}
 
 	/**
 	 * Creates a condition that will wait for the given element to be disabled
 	 * @param selectorOrLocator A <[Locatable]> to use to find the element.
 	 */
-	static elementIsDisabled(selectorOrLocator: NullableLocatable): Condition {
+	static elementIsDisabled(selectorOrLocator: NullableLocatable): Condition<MaybeElementHandle> {
 		return new ElementStateCondition('elementIsDisabled', selectorOrLocator, true)
 	}
 
@@ -58,7 +68,7 @@ export class Until {
 	 * Creates a condition that will wait for the given element to be enabled
 	 * @param selectorOrLocator A <[Locatable]> to use to find the element.
 	 */
-	static elementIsEnabled(selectorOrLocator: NullableLocatable): Condition {
+	static elementIsEnabled(selectorOrLocator: NullableLocatable): Condition<ElementHandle | null> {
 		return new ElementStateCondition('elementIsEnabled', selectorOrLocator, false)
 	}
 
@@ -66,7 +76,7 @@ export class Until {
 	 * Creates a condition that will wait for the given element to be deselected.
 	 * @param selectorOrLocator A <[Locatable]> to use to find the element.
 	 */
-	static elementIsSelected(selectorOrLocator: NullableLocatable): Condition {
+	static elementIsSelected(selectorOrLocator: NullableLocatable): Condition<MaybeElementHandle> {
 		return new ElementSelectedCondition('elementIsSelected', selectorOrLocator, true)
 	}
 
@@ -74,7 +84,7 @@ export class Until {
 	 * Creates a condition that will wait for the given element to be in the DOM, yet not visible to the user
 	 * @param selectorOrLocator A <[Locatable]> to use to find the element.
 	 */
-	static elementIsNotSelected(selectorOrLocator: NullableLocatable): Condition {
+	static elementIsNotSelected(selectorOrLocator: NullableLocatable): Condition<MaybeElementHandle> {
 		return new ElementSelectedCondition('elementIsNotSelected', selectorOrLocator, false)
 	}
 
@@ -90,7 +100,7 @@ export class Until {
 	 *
 	 * @param selectorOrLocator A <[Locatable]> to use to find the element.
 	 */
-	static elementIsVisible(selectorOrLocator: NullableLocatable): Condition {
+	static elementIsVisible(selectorOrLocator: NullableLocatable): Condition<MaybeElementHandle> {
 		return new ElementVisibilityCondition('elementIsVisible', selectorOrLocator, true, false)
 	}
 
@@ -107,35 +117,44 @@ export class Until {
 	 *
 	 * @param selectorOrLocator A <[Locatable]> to use to find the element.
 	 */
-	static elementIsNotVisible(selectorOrLocator: NullableLocatable): Condition {
+	static elementIsNotVisible(selectorOrLocator: NullableLocatable): Condition<MaybeElementHandle> {
 		return new ElementVisibilityCondition('elementIsNotVisible', selectorOrLocator, false, true)
 	}
 
 	/**
 	 * Creates a condition which will wait until the element is located on the page.
 	 */
-	static elementLocated(selectorOrLocator: NullableLocatable): Condition {
+	static elementLocated(selectorOrLocator: NullableLocatable): Condition<MaybeElementHandle> {
 		return new ElementLocatedCondition('elementLocated', selectorOrLocator, true)
 	}
 
 	/**
 	 * Creates a condition which will wait until the element's text exactly matches the target text, excluding leading and trailing whitespace.
 	 */
-	static elementTextIs(selectorOrLocator: NullableLocatable, text: string): Condition {
+	static elementTextIs(
+		selectorOrLocator: NullableLocatable,
+		text: string,
+	): Condition<MaybeElementHandle> {
 		return new ElementTextCondition('elementTextIs', selectorOrLocator, text, false)
 	}
 
 	/**
 	 * Creates a condition which will wait until the element's text content contains the target text.
 	 */
-	static elementTextContains(selectorOrLocator: NullableLocatable, text: string): Condition {
+	static elementTextContains(
+		selectorOrLocator: NullableLocatable,
+		text: string,
+	): Condition<MaybeElementHandle> {
 		return new ElementTextCondition('elementTextContains', selectorOrLocator, text, true)
 	}
 
 	/**
 	 * Creates a condition which will wait until the element's text matches the target Regular Expression.
 	 */
-	static elementTextMatches(selectorOrLocator: NullableLocatable, regex: RegExp): Condition {
+	static elementTextMatches(
+		selectorOrLocator: NullableLocatable,
+		regex: RegExp,
+	): Condition<MaybeElementHandle> {
 		return new ElementTextCondition('elementTextMatches', selectorOrLocator, regex.toString())
 	}
 
@@ -145,7 +164,7 @@ export class Until {
 	static elementsLocated(
 		selectorOrLocator: NullableLocatable,
 		desiredCount: number = 1,
-	): Condition {
+	): Condition<MaybeElementHandle> {
 		return new ElementsLocatedCondition('elementsLocated', selectorOrLocator, desiredCount)
 	}
 
@@ -160,42 +179,42 @@ export class Until {
 	/**
 	 * Creates a condition which waits until the page title contains the expected text.
 	 */
-	static titleContains(title: string): Condition {
+	static titleContains(title: string): Condition<string> {
 		return new TitleCondition('titleContains', title, true)
 	}
 
 	/**
 	 * Creates a condition which waits until the page title exactly matches the expected text.
 	 */
-	static titleIs(title: string): Condition {
+	static titleIs(title: string): Condition<string> {
 		return new TitleCondition('titleIs', title, false)
 	}
 
 	/**
 	 * Creates a condition which waits until the page title matches the title `RegExp`.
 	 */
-	static titleMatches(title: RegExp): Condition {
+	static titleMatches(title: RegExp): Condition<string> {
 		return new TitleCondition('titleMatches', `${title}`, false)
 	}
 
 	/**
 	 * Creates a condition which waits until the page URL contains the expected path.
 	 */
-	static urlContains(url: string): Condition {
+	static urlContains(url: string): Condition<string> {
 		return new URLCondition('urlContains', url, true)
 	}
 
 	/**
 	 * Creates a condition which waits until the page URL exactly matches the expected URL.
 	 */
-	static urlIs(url: string): Condition {
+	static urlIs(url: string): Condition<string> {
 		return new URLCondition('urlIs', url, false)
 	}
 
 	/**
 	 * Creates a condition which waits until the page URL matches the supplied `RegExp`.
 	 */
-	static urlMatches(url: RegExp): Condition {
+	static urlMatches(url: RegExp): Condition<string> {
 		return new URLCondition('urlMatches', url.toString(), true)
 	}
 }
