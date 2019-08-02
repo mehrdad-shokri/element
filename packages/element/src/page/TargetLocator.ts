@@ -26,6 +26,19 @@ export class TargetLocator implements ITargetLocator {
 		this.apply(null)
 	}
 
+	public async popup(url: string) {
+		let pages = await this.page.browserContext().pages()
+		return pages.find(page => page.target().url() === url)
+	}
+
+	public async tab(url: string) {
+		return this.popup(url)
+	}
+
+	public async window(url: string) {
+		return this.popup(url)
+	}
+
 	/**
 	 * Changes the active target to another frame.
 	 *
