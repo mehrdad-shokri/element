@@ -29,6 +29,7 @@ import Mouse from '../page/Mouse'
 import { rewriteError } from './decorators/rewriteError'
 import { addCallbacks } from './decorators/addCallbacks'
 import { autoWaitUntil } from './decorators/autoWait'
+import { Step } from './Step'
 
 export const debug = debugFactory('element:runtime:browser')
 const debugScreenshot = debugFactory('element:runtime:browser:screenshot')
@@ -83,18 +84,19 @@ export const getFrames = (childFrames: Frame[], collection?: Set<Frame>): Frame[
 	return Array.from(collection.values())
 }
 
-export class Browser<T> implements BrowserInterface {
+export class Browser implements BrowserInterface {
 	public screenshots: string[]
-	customContext: T
+	customContext: Step
 
 	public readonly mouse: Mouse = new Mouse(this)
+	private _customPage: Page
 
 	constructor(
 		public workRoot: WorkRoot,
 		private client: IPuppeteerClient,
 		public settings: ConcreteTestSettings,
-		public beforeFunc: (b: Browser<T>, name: string) => Promise<void> = async () => {},
-		public afterFunc: (b: Browser<T>, name: string) => Promise<void> = async () => {},
+		public beforeFunc: (b: Browser, name: string) => Promise<void> = async () => {},
+		public afterFunc: (b: Browser, name: string) => Promise<void> = async () => {},
 		private activeFrame?: Frame | null,
 	) {
 		this.beforeFunc && this.afterFunc
@@ -108,6 +110,17 @@ export class Browser<T> implements BrowserInterface {
 
 	public testData(name: string): string {
 		return this.workRoot.testData(name)
+	}
+
+	/**
+	 * Returns the protocol layer ID of this window
+	 *
+	 * @readonly
+	 * @memberof Browser
+	 */
+	public get id() {
+		// @ts-ignore
+		return this.page._target._targetId
 	}
 
 	public get target(): Frame {
@@ -124,12 +137,33 @@ export class Browser<T> implements BrowserInterface {
 	}
 
 	public get page(): Page {
-		return this.client.page
+		return this._customPage || this.client.page
+	}
+
+	public set page(newPage: Page) {
+		this._customPage = newPage
 	}
 
 	public get frames(): Frame[] {
 		return getFrames(this.page.frames())
 	}
+
+	public async windows(): Promise<Browser[]> {
+		let pages = await this.page.browserContext().pages()
+		return Promise.all(pages.map(page => this.withPage(page)))
+	}
+
+	public async withPage(page: Page): Promise<Browser> {
+		let browser = new Browser(this.workRoot, this.client, this.settings)
+		browser.page = page
+		return browser
+	}
+
+	// static async fromPage<T>(page: Page): Promise<Browser> {
+	// 	let browser = new Browser(this.workRoot, this.client, this.settings)
+	// 	browser.page = page
+	// 	return browser
+	// }
 
 	/**
 	 * Returns the URL of the current frame/page
@@ -158,20 +192,22 @@ export class Browser<T> implements BrowserInterface {
 	}
 
 	@addCallbacks()
-	public async wait(timeoutOrCondition: Condition | number): Promise<boolean> {
+	public async wait<T>(timeoutOrCondition: Condition<T | null> | number): Promise<T | null> {
 		if (typeof timeoutOrCondition === 'number') {
 			await new Promise(yeah => setTimeout(yeah, Number(timeoutOrCondition) * 1e3))
-			return true
+			return null
 		}
 
 		debug('wait')
 		try {
-			let condition: Condition = timeoutOrCondition
+			let condition: Condition<T | null> = timeoutOrCondition
 			condition.settings = this.settings
 			if (condition.hasWaitFor) {
-				return await condition.waitFor(this.target, this.page)
+				return condition.waitFor(this.target, this.page)
 			} else {
-				return await condition.waitForEvent(this.page)
+				return condition.waitForEvent(this.page, (page: Page) => {
+					return this.withPage(page)
+				})
 			}
 		} catch (err) {
 			debug('wait timed out')

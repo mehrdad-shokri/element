@@ -93,7 +93,7 @@ describe('Browser', function() {
 	})
 
 	describe('Frame handling', () => {
-		let browser: Browser<any>
+		let browser: Browser
 
 		beforeEach(async () => {
 			browser = new Browser(workRoot, puppeteer, DEFAULT_SETTINGS)
@@ -138,6 +138,41 @@ describe('Browser', function() {
 			await input.clear()
 			await input.type('Hello World')
 			expect(await input.getProperty('value')).to.equal('Hello World')
+		})
+	})
+
+	describe.only('window/tab handling', () => {
+		let browser: Browser
+
+		beforeEach(async () => {
+			browser = new Browser(workRoot, puppeteer, DEFAULT_SETTINGS)
+			await browser.visit('http://localhost:1337/window_switching.html')
+		})
+
+		afterEach(async () => {
+			await browser.page.close()
+		})
+
+		it('can get popup window after waiting', async () => {
+			let opener = await browser.findElement(By.id('open'))
+			await opener.click()
+
+			let window = await browser.wait(Until.popupIsPresent())
+			if (window) {
+				expect(await window.title()).to.equal('closeable window')
+			}
+		})
+
+		it('can get all windows', async () => {
+			let opener = await browser.findElement(By.id('open'))
+			opener.click()
+
+			await browser.wait(Until.popupIsPresent())
+
+			let windows = await browser.windows()
+			expect(windows).to.have.lengthOf(4)
+
+			expect(await Promise.all(windows.map(b => b.url))).to.deep.equal([])
 		})
 	})
 

@@ -28,7 +28,7 @@ export default class Test {
 	public settings: ConcreteTestSettings
 	public steps: Step[]
 
-	public runningBrowser: Browser<Step> | null
+	public runningBrowser: Browser | null
 
 	public requestInterceptor: Interceptor
 
@@ -112,7 +112,7 @@ export default class Test {
 		const { testData } = this.script
 
 		try {
-			const browser = new Browser<Step>(
+			const browser = new Browser(
 				this.script.runEnv.workRoot,
 				this.client,
 				this.settings,
@@ -177,12 +177,7 @@ export default class Test {
 		}
 	}
 
-	async runStep(
-		testObserver: TestObserver,
-		browser: Browser<Step>,
-		step: Step,
-		testDataRecord: any,
-	) {
+	async runStep(testObserver: TestObserver, browser: Browser, step: Step, testDataRecord: any) {
 		let error: Error | null = null
 		await testObserver.beforeStep(this, step)
 
@@ -291,14 +286,14 @@ export default class Test {
 		})
 	}
 
-	public async willRunCommand(testObserver: TestObserver, browser: Browser<Step>, command: string) {
+	public async willRunCommand(testObserver: TestObserver, browser: Browser, command: string) {
 		const step: Step = browser.customContext
 		await testObserver.beforeStepAction(this, step, command)
 
 		debug(`Before action: '${command}()' waiting on actionDelay: ${this.settings.actionDelay}`)
 	}
 
-	async didRunCommand(testObserver: TestObserver, browser: Browser<Step>, command: string) {
+	async didRunCommand(testObserver: TestObserver, browser: Browser, command: string) {
 		await testObserver.afterStepAction(this, browser.customContext, command)
 	}
 

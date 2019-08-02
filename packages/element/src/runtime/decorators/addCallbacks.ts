@@ -5,13 +5,13 @@ import { Browser, debug } from '../Browser'
 /**
  * Defines a Function Decorator which wraps a method with class local before and after
  */
-export function addCallbacks<T>() {
+export function addCallbacks() {
 	const errorInterpreters = [interpretPuppeteerError]
 	return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 		let originalFn = descriptor.value
 		descriptor.value = async function(...args: any[]) {
 			let ret
-			const browser: Browser<T> = this
+			const browser: Browser = this
 			// capture the stack trace at call-time
 			const calltimeError = new Error()
 			Error.captureStackTrace(calltimeError)
@@ -22,7 +22,7 @@ export function addCallbacks<T>() {
 				if (browser.afterFunc instanceof Function) await browser.afterFunc(browser, propertyKey)
 			} catch (e) {
 				debug('addCallbacks lifting to StructuredError', propertyKey, e)
-				const newError = interpretError<Browser<T>, AnyErrorData>(
+				const newError = interpretError<Browser, AnyErrorData>(
 					errorInterpreters,
 					e,
 					this,

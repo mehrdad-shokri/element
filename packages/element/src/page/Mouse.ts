@@ -10,7 +10,7 @@ export type Point = [number, number]
  * @public
  */
 export default class Mouse {
-	constructor(private browser: Browser<any>) {}
+	constructor(private browser: Browser) {}
 
 	/**
 	 * Dispatches a `mousedown` event

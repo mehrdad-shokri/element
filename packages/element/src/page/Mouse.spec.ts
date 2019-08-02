@@ -11,7 +11,7 @@ let dogfoodServer = new DogfoodServer()
 let page: Page
 let puppeteer: testPuppeteer
 const workRoot = testWorkRoot()
-let browser: Browser<any>
+let browser: Browser
 
 const getText = async (selector: string): Promise<string> => {
 	return page.$eval(selector, (element: HTMLParagraphElement) => element.textContent!.trim())

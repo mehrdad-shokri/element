@@ -8,7 +8,7 @@ export function rewriteError<T>() {
 		let originalFn = descriptor.value
 		descriptor.value = async function(...args: any[]) {
 			let ret
-			const browser: Browser<T> = this
+			const browser: Browser = this
 
 			// capture the stack trace at call-time
 			const calltimeError = new Error()
@@ -18,7 +18,7 @@ export function rewriteError<T>() {
 				ret = await originalFn.apply(browser, args)
 			} catch (e) {
 				debug('rewriteError lifting to StructuredError', propertyKey, e)
-				const newError = interpretError<Browser<T>, AnyErrorData>(
+				const newError = interpretError<Browser, AnyErrorData>(
 					errorInterpreters,
 					e,
 					this,

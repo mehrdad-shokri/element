@@ -228,7 +228,7 @@ describe('ElementHandle', function() {
 	})
 
 	describe('uploadFile', () => {
-		let browser: Browser<any>
+		let browser: Browser
 		beforeEach(async () => {
 			browser = new Browser(testWorkRoot(), puppeteer, DEFAULT_SETTINGS)
 			await browser.visit('http://localhost:1337/forms_with_input_elements.html')
